@@ -1,9 +1,12 @@
 import config
 import telebot
 import time
+import os
+from flask import Flask, request
 
 bot = telebot.TeleBot(config.token)
 
+server = Flask(__name__)
 
 @bot.message_handler(content_types=["document"])
 def save_doc(message):
@@ -64,5 +67,16 @@ def load_file_id():
     return list_of_files
 
 
-if __name__ == '__main__':
-    bot.polling(none_stop=True)
+@server.route("/bot", methods=['POST'])
+def getMessage():
+    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+    return "!", 200
+
+@server.route("/")
+def webhook():
+    bot.remove_webhook()
+    bot.set_webhook(url="https://botautopost.herokuapp.com/bot")
+    return "!", 200
+
+server.run(host="0.0.0.0", port=os.environ.get('PORT', 5000))
+server = Flask(__name__)
