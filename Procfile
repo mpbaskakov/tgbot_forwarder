@@ -1,1 +1,1 @@
-working: python botautopost.py
+web: python botautopost.py
