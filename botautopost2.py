@@ -34,7 +34,7 @@ def send_document(bot, update):
 
 
 def start(bot, update, job_queue, chat_data):
-    job = job_queue.run_repeating(send_document, interval=random.randint(1, 3), first=0)
+    job = job_queue.run_repeating(send_document, interval=random.randint(2000, 4000), first=0)
     chat_data['job'] = job
 
 
