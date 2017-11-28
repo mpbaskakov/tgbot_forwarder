@@ -1,1 +1,1 @@
-web: python botautopost.py
+web: python botautopost2.py
