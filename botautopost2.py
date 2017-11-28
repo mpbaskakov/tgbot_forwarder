@@ -1,32 +1,14 @@
+import random
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 import os
 import config
-import time
-
-PORT = int(os.environ.get('PORT', '5000'))
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
-
-
-def check_sended(file_id):
-    list_of_files = []
-    with open('list_sended.txt', 'r', encoding='UTF-8') as f:
-        for line in f:
-            list_of_files.append(line.strip('\n'))
-    print(list_of_files)
-    if not list_of_files.count(file_id):
-        return True
-    return False
-
-
-def save_sended(file_id):
-    with open('list_sended.txt', 'a') as f:
-        f.write(file_id + '\n')
 
 
 def load_file_id():
@@ -37,19 +19,23 @@ def load_file_id():
     return list_of_files
 
 
-def print_file_id(message):
-    with open('list.txt', 'rb') as f:
-        bot.send_message(message.chat.id, f.read())
+def print_file_id(bot, update):
+    with open('list.txt', 'r') as f:
+        update.message.reply_text("List of id's:\n" + f.read())
 
 
-def start(bot, update):
+def send_document(bot, update):
     list_of_files = load_file_id()
-    for file_id in list_of_files:
-        print(file_id)
-        if check_sended(file_id):
-            bot.send_document(config.chat_id, file_id)
-            save_sended(file_id)
-            time.sleep(10)
+    bot.send_document(config.chat_id, list_of_files[0])
+    list_of_files.remove(list_of_files[0])
+    with open('list.txt', 'w') as file:
+        for f in list_of_files:
+            file.write(f + '\n')
+
+
+def start(bot, update, job_queue, chat_data):
+    job = job_queue.run_repeating(send_document, interval=random.randint(1, 3), first=0)
+    chat_data['job'] = job
 
 
 def help(bot, update):
@@ -57,12 +43,9 @@ def help(bot, update):
     update.message.reply_text('Help!')
 
 
-def save_doc(message):
-    list_of_files_id = []
-    list_of_files_id.append(message.document.file_id)
-    list_to_write = ''.join(list_of_files_id)
+def save_doc(bot, update):
     with open('list.txt', 'a') as f:
-        f.write(list_to_write + '\n')
+        f.write(update.message.document.file_id + '\n')
 
 
 def error(bot, update, error):
@@ -70,19 +53,28 @@ def error(bot, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
 
 
+def job_stop(bot, update, job_queue, chat_data):
+    print(chat_data)
+    job = chat_data['job']
+    job.schedule_removal()
+    del chat_data['job']
+
+
+
 def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
     updater = Updater(config.token)
 
+
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CommandHandler("start", start, pass_job_queue=True, pass_chat_data=True))
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("list", print_file_id))
-
+    dp.add_handler(CommandHandler("stop", job_stop, pass_job_queue=True, pass_chat_data=True))
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.document, save_doc))
 
@@ -90,7 +82,7 @@ def main():
     dp.add_error_handler(error)
 
     updater.start_webhook(listen="0.0.0.0",
-                          port=PORT,
+                          port=int(os.environ.get('PORT', '5000')),
                           url_path=config.token)
     updater.bot.set_webhook("https://botautopost.herokuapp.com/" + config.token)
 
