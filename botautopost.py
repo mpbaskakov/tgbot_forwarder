@@ -73,7 +73,7 @@ def main():
     dp.add_error_handler(error)
 
     updater.start_webhook(listen="0.0.0.0",
-                          port=int(os.environ.get('PORT', '5000')),
+                          port=config.port,
                           url_path=config.token)
     updater.bot.set_webhook("https://botautopost.herokuapp.com/" + config.token)
 
