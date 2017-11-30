@@ -1,85 +1,83 @@
-import config
-import telebot
-import time
+import random
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+import logging
 import os
-from flask import Flask, request
+import config
+from db_connect import write_to_base, read_from_base
 
-bot = telebot.TeleBot(config.token, threaded=False)
+# Enable logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 
-server = Flask(__name__)
-
-
-@bot.message_handler(content_types=["document"])
-def save_doc(message):
-    list_of_files_id = []
-    list_of_files_id.append(message.document.file_id)
-    list_to_write = ''.join(list_of_files_id)
-    with open('list.txt', 'a') as f:
-        f.write(list_to_write + '\n')
+logger = logging.getLogger(__name__)
 
 
-@bot.message_handler(commands=['clean'])
-def clean_list():
-    pass
+def print_file_id(bot, update):
+    update.message.reply_text("List of id's:\n" + read_from_base())
 
 
-def delete_from_list(file_id):
-    pass
+def send_document(bot, update):
+    file_id = read_from_base()[0][0]
+    bot.send_document(config.chat_id, file_id)
+    write_to_base(file_id, erase=True)
 
 
-@bot.message_handler(commands=['list'])
-def print_file_id(message):
-    with open('list.txt', 'rb') as f:
-        bot.send_message(message.chat.id, f.read())
+def start(bot, update, job_queue, chat_data):
+    job = job_queue.run_repeating(send_document, interval=random.randint(2000, 4000), first=0)
+    chat_data['job'] = job
 
 
-def check_sended(file_id):
-    list_of_files = []
-    with open('list_sended.txt', 'r', encoding='UTF-8') as f:
-        for line in f:
-            list_of_files.append(line.strip('\n'))
-    print(list_of_files)
-    if not list_of_files.count(file_id):
-        return True
-    return False
+def help(bot, update):
+    """Send a message when the command /help is issued."""
+    update.message.reply_text('Help!')
 
 
-def save_sended(file_id):
-    with open('list_sended.txt', 'a') as f:
-        f.write(file_id + '\n')
+def save_doc(bot, update):
+    write_to_base(update.message.document.file_id, erase=False)
 
 
-@bot.message_handler(commands=['start'])
-def main(message):
-    list_of_files = load_file_id()
-    for file_id in list_of_files:
-        print(file_id)
-        if check_sended(file_id):
-            bot.send_document(config.chat_id, file_id)
-            save_sended(file_id)
-            time.sleep(3600)
+def error(bot, update, error):
+    """Log Errors caused by Updates."""
+    logger.warning('Update "%s" caused error "%s"', update, error)
 
 
-def load_file_id():
-    list_of_files = []
-    with open('list.txt', 'r', encoding='UTF-8') as f:
-        for line in f:
-            list_of_files.append(line.strip('\n'))
-    return list_of_files
+def job_stop(bot, update, job_queue, chat_data):
+    print(chat_data)
+    job = chat_data['job']
+    job.schedule_removal()
+    del chat_data['job']
 
 
-@server.route("/bot", methods=['POST'])
-def getmessage():
-    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
-    return "!", 200
+def main():
+    """Start the bot."""
+    # Create the EventHandler and pass it your bot's token.
+    updater = Updater(config.token)
+
+    # Get the dispatcher to register handlers
+    dp = updater.dispatcher
+
+    # on different commands - answer in Telegram
+    dp.add_handler(CommandHandler("start", start, pass_job_queue=True, pass_chat_data=True))
+    dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("list", print_file_id))
+    dp.add_handler(CommandHandler("stop", job_stop, pass_job_queue=True, pass_chat_data=True))
+    # on noncommand i.e message - echo the message on Telegram
+    dp.add_handler(MessageHandler(Filters.document, save_doc))
+
+    # log all errors
+    dp.add_error_handler(error)
+
+    updater.start_webhook(listen="0.0.0.0",
+                          port=int(os.environ.get('PORT', '5000')),
+                          url_path=config.token)
+    updater.bot.set_webhook("https://botautopost.herokuapp.com/" + config.token)
+
+    # Run the bot until you press Ctrl-C or the process receives SIGINT,
+    # SIGTERM or SIGABRT. This should be used most of the time, since
+    # start_polling() is non-blocking and will stop the bot gracefully.
+    updater.idle()
 
 
-@server.route("/")
-def webhook():
-    bot.remove_webhook()
-    bot.set_webhook(url="https://botautopost.herokuapp.com/bot")
-    return "!", 200
+if __name__ == '__main__':
+    main()
 
-
-server.run(host="0.0.0.0", port=os.environ.get('PORT', 5000))
-server = Flask(__name__)

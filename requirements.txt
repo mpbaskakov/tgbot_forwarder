@@ -1,3 +1,2 @@
-pytelegrambotapi
-flask
 python-telegram-bot
+psycopg2
