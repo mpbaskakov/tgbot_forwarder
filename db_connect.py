@@ -23,13 +23,25 @@ def sql_command(sql, fetch):
     conn.close()
 
 
-def write_to_base(file_id, erase):
+def write_to_base(table_id, file_id, erase):
     if not erase:
-        sql_command("INSERT INTO file_id (id) VALUES ('{}')".format(file_id), fetch=False)
+        sql_command("INSERT INTO {} VALUES ('{}')".format(table_id, file_id), fetch=False)
     else:
-        sql_command("DELETE FROM file_id WHERE id = '{}'".format(file_id), fetch=False)
+        sql_command("DELETE FROM {} WHERE id = '{}'".format(table_id, file_id), fetch=False)
 
 
-def read_from_base():
-    rows = sql_command("SELECT * FROM file_id", fetch=True)
+def create_table(bot, update):
+    chat_id = config.chat_id
+    for c in chat_id:
+        sql_command("CREATE TABLE {} (id text PRIMARY KEY)".format(c[1:]), fetch=False)
+
+
+def read_from_base(table_id):
+    rows = sql_command("SELECT * FROM {}".format(table_id), fetch=True)
     return rows
+
+
+def truncate_all(bot, update):
+    chat_id = config.chat_id
+    for c in chat_id:
+        sql_command("TRUNCATE {}".format(c[1:]), fetch=False)
