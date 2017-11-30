@@ -25,9 +25,9 @@ def sql_command(sql, fetch):
 
 def write_to_base(file_id, erase):
     if not erase:
-        sql_command("INSERT INTO file_id (id) VALUES ({})".format(file_id), fetch=False)
+        sql_command("INSERT INTO file_id (id) VALUES ('{}')".format(file_id), fetch=False)
     else:
-        sql_command("DELETE FROM file_id WHERE id = {}".format(file_id), fetch=False)
+        sql_command("DELETE FROM file_id WHERE id = '{}'".format(file_id), fetch=False)
 
 
 def read_from_base():
