@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def print_file_id(bot, update):
-    update.message.reply_text("List of id's:\n" + ''.join(read_from_base()))
+    update.message.reply_text("List of id's:\n" + ''.join(read_from_base()[0]))
 
 
 def send_document(bot, update):
