@@ -45,3 +45,9 @@ def truncate_all(bot, update):
     chat_id = config.chat_id
     for c in chat_id:
         sql_command("TRUNCATE {}".format(c[1:]), fetch=False)
+
+
+def delete_all(bot, update):
+    chat_id = config.chat_id
+    for c in chat_id:
+        sql_command("DROP TABLE {}".format(c[1:]), fetch=False)

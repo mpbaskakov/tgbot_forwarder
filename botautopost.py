@@ -2,7 +2,7 @@ import random
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 import config
-from db_connect import write_to_base, read_from_base, create_table, truncate_all
+from db_connect import write_to_base, read_from_base, create_table, truncate_all, delete_all
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -17,9 +17,7 @@ def print_file_id(bot, update):
 
 
 def send_document(bot, job):
-    # TODO add random selecting document
     file_list = read_from_base(config.chat_id[job.context][1:])
-    print(file_list)
     file_id = file_list[random.randint(0, len(file_list))][0]
     bot.send_document(config.chat_id[job.context], file_id)
     write_to_base(config.chat_id[job.context][1:], file_id, erase=True)
@@ -29,7 +27,6 @@ def send_document(bot, job):
 
 
 def start(bot, update, job_queue, chat_data):
-    # TODO add environment variable for time
     job = job_queue.run_repeating(send_document, interval=random.randint(config.time_s, config.time_e), first=0, context=0)
     chat_data['job'] = job
 
@@ -70,6 +67,7 @@ def main():
     dp.add_handler(CommandHandler("list", print_file_id))
     dp.add_handler(CommandHandler("ct", create_table))
     dp.add_handler(CommandHandler("tall", truncate_all))
+    dp.add_handler(CommandHandler("all_del", delete_all))
     dp.add_handler(CommandHandler("stop", job_stop, pass_job_queue=True, pass_chat_data=True))
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.document, save_doc))
