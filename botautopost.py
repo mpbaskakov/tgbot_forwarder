@@ -12,11 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 def print_file_id(bot, update):
+    # TODO implement this function
     update.message.reply_text("List of id's:\n" + ''.join(read_from_base()))
 
 
 def send_document(bot, job):
-    file_id = read_from_base(config.chat_id[job.context][1:])[0][0]
+    # TODO add random selecting document
+    file_list = read_from_base(config.chat_id[job.context][1:])[0]
+    file_id = file_list[random.randint(0, len(file_list))]
     bot.send_document(config.chat_id[job.context], file_id)
     write_to_base(config.chat_id[job.context][1:], file_id, erase=True)
     job.context += 1
@@ -25,9 +28,9 @@ def send_document(bot, job):
 
 
 def start(bot, update, job_queue, chat_data):
-    job = job_queue.run_repeating(send_document, interval=random.randint(1500, 1740), first=0, context=0)
+    # TODO add environment variable for time
+    job = job_queue.run_repeating(send_document, interval=random.randint(config.time_s, config.time_e), first=0, context=0)
     chat_data['job'] = job
-
 
 
 def help(bot, update):
@@ -36,6 +39,7 @@ def help(bot, update):
 
 
 def save_doc(bot, update):
+    # TODO add categories by filename
     for c in config.chat_id:
         write_to_base(c[1:], update.message.document.file_id, erase=False)
 
