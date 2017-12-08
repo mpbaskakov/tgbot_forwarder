@@ -26,8 +26,12 @@ def send_document(bot, job):
         job.context = 0
 
 
-def start(bot, update, job_queue, chat_data):
-    job = job_queue.run_repeating(send_document, interval=randrange(config.time_s, config.time_e, 1), first=0, context=0)
+def start(bot, update, job_queue, chat_data, *args):
+    inter = randrange(config.time_s, config.time_e, 1)
+    if args:
+        job = job_queue.run_repeating(send_document, interval=inter, first=0, context=int(args))
+    else:
+        job = job_queue.run_repeating(send_document, interval=inter, first=0, context=0)
     chat_data['job'] = job
 
 
@@ -61,6 +65,14 @@ def rewrite(bot, update):
             write_to_base(c[1:], row[0], erase=False)
 
 
+def count_time(bot, update):
+    file_count = []
+    for c in config.chat_id:
+        file_count.append(read_from_base(c[1:]).count())
+    file_count = [(f*(config.time_s+config.time_e)/2)/3600 for f in file_count]
+    print(file_count)
+
+
 def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
@@ -77,6 +89,7 @@ def main():
     dp.add_handler(CommandHandler("tall", truncate_all))
     dp.add_handler(CommandHandler("all_del", delete_all))
     dp.add_handler(CommandHandler("re", rewrite))
+    dp.add_handler(CommandHandler("count", count_time))
     dp.add_handler(CommandHandler("stop", job_stop, pass_job_queue=True, pass_chat_data=True))
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.document, save_doc))
