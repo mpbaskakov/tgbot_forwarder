@@ -1,9 +1,8 @@
-import random
+from random import randrange, randint
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
-import os
 import config
-from db_connect import write_to_base, read_from_base
+from db_connect import write_to_base, read_from_base, create_table, truncate_all, delete_all
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -13,17 +12,26 @@ logger = logging.getLogger(__name__)
 
 
 def print_file_id(bot, update):
-    update.message.reply_text("List of id's:\n" + ''.join(read_from_base()[0]))
+    # TODO implement this function
+    update.message.reply_text("List of id's:\n" + ''.join(read_from_base()))
 
 
-def send_document(bot, update):
-    file_id = read_from_base()[0][0]
-    bot.send_document(config.chat_id, file_id)
-    write_to_base(file_id, erase=True)
+def send_document(bot, job):
+    file_list = read_from_base(config.chat_id[job.context][1:])
+    file_id = file_list[randint(0, len(file_list) - 1)][0]
+    bot.send_document(config.chat_id[job.context], file_id)
+    write_to_base(config.chat_id[job.context][1:], file_id, erase=True)
+    job.context += 1
+    if job.context == 5:
+        job.context = 0
 
 
-def start(bot, update, job_queue, chat_data):
-    job = job_queue.run_repeating(send_document, interval=random.randint(2000, 4000), first=0)
+def start(bot, update, job_queue, chat_data, args):
+    inter = randrange(config.time_s, config.time_e, 1)
+    if args:
+        job = job_queue.run_repeating(send_document, interval=inter, first=0, context=int(args[0]))
+    else:
+        job = job_queue.run_repeating(send_document, interval=inter, first=0, context=0)
     chat_data['job'] = job
 
 
@@ -33,7 +41,9 @@ def help(bot, update):
 
 
 def save_doc(bot, update):
-    write_to_base(update.message.document.file_id, erase=False)
+    # TODO add categories by filename
+    for c in config.chat_id:
+        write_to_base(c[1:], update.message.document.file_id, erase=False)
 
 
 def error(bot, update, error):
@@ -42,10 +52,26 @@ def error(bot, update, error):
 
 
 def job_stop(bot, update, job_queue, chat_data):
-    print(chat_data)
     job = chat_data['job']
     job.schedule_removal()
     del chat_data['job']
+
+
+def rewrite(bot, update):
+    rows = read_from_base(config.chat_id[-1][1:])
+    truncate_all(bot, update)
+    for c in config.chat_id:
+        for row in rows:
+            write_to_base(c[1:], row[0], erase=False)
+
+
+def count_time(bot, update):
+    file_count = []
+    for c in config.chat_id:
+        file_count.append(len(read_from_base(c[1:])))
+    file_count_h = [(f*(config.time_s+config.time_e)/2)/3600 for f in file_count]
+    file_count_d = [(f*(config.time_s+config.time_e)/2)/3600/24 for f in file_count]
+    update.message.reply_text("Time left:\n" + file_count_h + '\n' + file_count_d)
 
 
 def main():
@@ -57,9 +83,14 @@ def main():
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("start", start, pass_job_queue=True, pass_chat_data=True))
+    dp.add_handler(CommandHandler("start", start, pass_job_queue=True, pass_chat_data=True, pass_args=True))
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("list", print_file_id))
+    dp.add_handler(CommandHandler("ct", create_table))
+    dp.add_handler(CommandHandler("tall", truncate_all))
+    dp.add_handler(CommandHandler("all_del", delete_all))
+    dp.add_handler(CommandHandler("re", rewrite))
+    dp.add_handler(CommandHandler("count", count_time))
     dp.add_handler(CommandHandler("stop", job_stop, pass_job_queue=True, pass_chat_data=True))
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.document, save_doc))
@@ -68,7 +99,7 @@ def main():
     dp.add_error_handler(error)
 
     updater.start_webhook(listen="0.0.0.0",
-                          port=int(os.environ.get('PORT', '5000')),
+                          port=config.port,
                           url_path=config.token)
     updater.bot.set_webhook("https://botautopost.herokuapp.com/" + config.token)
 
