@@ -58,7 +58,7 @@ def rewrite(bot, update):
     truncate_all(bot, update)
     for c in config.chat_id:
         for row in rows:
-            write_to_base(c[1:], row, erase=False)
+            write_to_base(c[1:], row[0], erase=False)
 
 
 def main():
