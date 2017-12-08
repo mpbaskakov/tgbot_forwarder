@@ -68,7 +68,7 @@ def rewrite(bot, update):
 def count_time(bot, update):
     file_count = []
     for c in config.chat_id:
-        file_count.append(read_from_base(c[1:]).count())
+        file_count.append(len(read_from_base(c[1:])))
     file_count = [(f*(config.time_s+config.time_e)/2)/3600 for f in file_count]
     print(file_count)
 
