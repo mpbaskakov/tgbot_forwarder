@@ -29,7 +29,7 @@ def send_document(bot, job):
 def start(bot, update, job_queue, chat_data, args):
     inter = randrange(config.time_s, config.time_e, 1)
     if args:
-        job = job_queue.run_repeating(send_document, interval=inter, first=0, context=int(args))
+        job = job_queue.run_repeating(send_document, interval=inter, first=0, context=int(args[0]))
     else:
         job = job_queue.run_repeating(send_document, interval=inter, first=0, context=0)
     chat_data['job'] = job
