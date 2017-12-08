@@ -71,7 +71,7 @@ def count_time(bot, update):
         file_count.append(len(read_from_base(c[1:])))
     file_count_h = [(f*(config.time_s+config.time_e)/2)/3600 for f in file_count]
     file_count_d = [(f*(config.time_s+config.time_e)/2)/3600/24 for f in file_count]
-    update.message.reply_text("Time left:\n {}\n {}".format(map((str, file_count_h, file_count_d))))
+    update.message.reply_text("Time left:\n {}\n {}".format(str(file_count_h), str(file_count_d)))
 
 
 def main():
