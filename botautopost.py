@@ -1,4 +1,4 @@
-import random
+from random import randrange, randint
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 import config
@@ -18,7 +18,7 @@ def print_file_id(bot, update):
 
 def send_document(bot, job):
     file_list = read_from_base(config.chat_id[job.context][1:])
-    file_id = file_list[random.randint(0, len(file_list) - 1)][0]
+    file_id = file_list[randint(0, len(file_list) - 1)][0]
     bot.send_document(config.chat_id[job.context], file_id)
     write_to_base(config.chat_id[job.context][1:], file_id, erase=True)
     job.context += 1
@@ -27,7 +27,7 @@ def send_document(bot, job):
 
 
 def start(bot, update, job_queue, chat_data):
-    job = job_queue.run_repeating(send_document, interval=random.randint(config.time_s, config.time_e), first=0, context=0)
+    job = job_queue.run_repeating(send_document, interval=randrange(config.time_s, config.time_e, 1), first=0, context=0)
     chat_data['job'] = job
 
 
@@ -53,6 +53,14 @@ def job_stop(bot, update, job_queue, chat_data):
     del chat_data['job']
 
 
+def rewrite(bot, update):
+    rows = read_from_base(config.chat_id[-1][1:])
+    truncate_all(bot, update)
+    for c in config.chat_id:
+        for row in rows:
+            write_to_base(c[1:], row, erase=False)
+
+
 def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
@@ -68,6 +76,7 @@ def main():
     dp.add_handler(CommandHandler("ct", create_table))
     dp.add_handler(CommandHandler("tall", truncate_all))
     dp.add_handler(CommandHandler("all_del", delete_all))
+    dp.add_handler(CommandHandler("re", rewrite))
     dp.add_handler(CommandHandler("stop", job_stop, pass_job_queue=True, pass_chat_data=True))
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.document, save_doc))
