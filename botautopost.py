@@ -26,7 +26,7 @@ def send_document(bot, job):
         job.context = 0
 
 
-def start(bot, update, job_queue, chat_data, *args):
+def start(bot, update, job_queue, chat_data, args):
     inter = randrange(config.time_s, config.time_e, 1)
     if args:
         job = job_queue.run_repeating(send_document, interval=inter, first=0, context=int(args))
