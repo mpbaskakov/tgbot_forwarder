@@ -82,7 +82,7 @@ def main():
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("start", start, pass_job_queue=True, pass_chat_data=True))
+    dp.add_handler(CommandHandler("start", start, pass_job_queue=True, pass_chat_data=True, pass_args=True))
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("list", print_file_id))
     dp.add_handler(CommandHandler("ct", create_table))
