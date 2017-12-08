@@ -29,7 +29,7 @@ def send_document(bot, job):
 def start(bot, update, job_queue, chat_data, args):
     inter = randrange(config.time_s, config.time_e, 1)
     if args:
-        job = job_queue.run_repeating(send_document, interval=inter, first=0, context=int(args[0]))
+        job = job_queue.run_repeating(send_document, interval=inter, first=0, context=int(args[0] - 1))
     else:
         job = job_queue.run_repeating(send_document, interval=inter, first=0, context=0)
     chat_data['job'] = job
@@ -67,10 +67,11 @@ def rewrite(bot, update):
 
 def count_time(bot, update):
     file_count = []
+    length = len(config.chat_id)
     for c in config.chat_id:
         file_count.append(len(read_from_base(c[1:])))
-    file_count_h = [(f*(config.time_s+config.time_e)/2)/3600 for f in file_count]
-    file_count_d = [(f*(config.time_s+config.time_e)/2)/3600/24 for f in file_count]
+    file_count_h = [(f*(config.time_s+config.time_e)/2*length)/3600 for f in file_count]
+    file_count_d = [(f*(config.time_s+config.time_e)/2*length)/3600/24 for f in file_count]
     update.message.reply_text("Time left:\n {}\n {}".format(str(file_count_h), str(file_count_d)))
 
 
