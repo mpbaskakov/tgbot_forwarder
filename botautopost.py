@@ -76,7 +76,7 @@ def count_time(bot, update):
 
 
 def show_jobs(bot, update, job_queue):
-    update.message.reply_text(str(job_queue.jobs()))
+    update.message.reply_text(str(job_queue.jobs()[0]))
 
 
 def main():
