@@ -76,7 +76,7 @@ def count_time(bot, update):
 
 
 def show_jobs(bot, update, job_queue):
-    update.message.reply_text(job_queue.jobs(job_queue))
+    update.message.reply_text(job_queue.jobs())
 
 
 def main():
@@ -95,7 +95,7 @@ def main():
     dp.add_handler(CommandHandler("tall", truncate_all))
     dp.add_handler(CommandHandler("all_del", delete_all))
     dp.add_handler(CommandHandler("re", rewrite))
-    dp.add_handler(CommandHandler("jobs", show_jobs))
+    dp.add_handler(CommandHandler("jobs", show_jobs, pass_job_queue=True))
     dp.add_handler(CommandHandler("count", count_time))
     dp.add_handler(CommandHandler("stop", job_stop, pass_job_queue=True, pass_chat_data=True))
     # on noncommand i.e message - echo the message on Telegram
