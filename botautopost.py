@@ -3,12 +3,74 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 import config
 from db_connect import write_to_base, read_from_base, create_table, truncate_all, delete_all
+import pickle
+from threading import Event
+from time import time
+from datetime import timedelta
+
+JOBS_PICKLE = 'job_tuples.pickle'
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
+
+
+def load_jobs(jq):
+    now = time()
+
+    with open(JOBS_PICKLE, 'rb') as fp:
+        while True:
+            try:
+                next_t, job = pickle.load(fp)
+            except EOFError:
+                break  # Loaded all job tuples
+
+            # Create threading primitives
+            enabled = job._enabled
+            removed = job._remove
+
+            job._enabled = Event()
+            job._remove = Event()
+
+            if enabled:
+                job._enabled.set()
+
+            if removed:
+                job._remove.set()
+
+            next_t -= now  # Convert from absolute to relative time
+
+            jq.put(job, next_t)
+
+
+def save_jobs(jq):
+    job_tuples = jq.queue.queue
+
+    with open(JOBS_PICKLE, 'wb') as fp:
+        for next_t, job in job_tuples:
+            # Back up objects
+            _job_queue = job._job_queue
+            _remove = job._remove
+            _enabled = job._enabled
+
+            # Replace un-pickleable threading primitives
+            job._job_queue = None  # Will be reset in jq.put
+            job._remove = job.removed  # Convert to boolean
+            job._enabled = job.enabled  # Convert to boolean
+
+            # Pickle the job
+            pickle.dump((next_t, job), fp)
+
+            # Restore objects
+            job._job_queue = _job_queue
+            job._remove = _remove
+            job._enabled = _enabled
+
+
+def save_jobs_job(bot, job):
+    save_jobs(job.job_queue)
 
 
 def print_file_id(bot, update):
@@ -83,6 +145,7 @@ def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
     updater = Updater(config.token)
+    job_queue = updater.job_queue
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
@@ -108,11 +171,22 @@ def main():
                           port=config.port,
                           url_path=config.token)
     updater.bot.set_webhook("https://botautopost.herokuapp.com/" + config.token)
+    # Periodically save jobs
+    job_queue.run_repeating(save_jobs_job, timedelta(minutes=1))
 
+    try:
+        load_jobs(job_queue)
+
+    except FileNotFoundError:
+        # First run
+        pass
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
+
+    # Run again after bot has been properly shut down
+    save_jobs(job_queue)
 
 
 if __name__ == '__main__':
