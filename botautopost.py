@@ -51,7 +51,7 @@ def error(bot, update, error):
 
 
 def job_stop(bot, update, job_queue):
-    job_queue.stop()
+    job_queue.schedule
 
 
 def rewrite(bot, update):
@@ -66,8 +66,8 @@ def count_time(bot, update):
     file_count = []
     for c in config.chat_id:
         file_count.append(len(read_from_base(c[1:])))
-    file_count_h = [f*config.post_int/3600 for f in file_count]
-    file_count_d = [f*config.post_int/3600/24 for f in file_count]
+    file_count_h = [f*config.post_int*len(file_count)/3600 for f in file_count]
+    file_count_d = [f*config.post_int*len(file_count)/3600/24 for f in file_count]
     update.message.reply_text("Time left:\n {}\n {}".format(str(file_count_h), str(file_count_d)))
 
 
