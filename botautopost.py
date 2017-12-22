@@ -22,16 +22,15 @@ def send_document(bot, job):
     bot.send_document(config.chat_id[job.context], file_id)
     write_to_base(config.chat_id[job.context][1:], file_id, erase=True)
     job.context += 1
-    job.interval = randrange(config.time_s, config.time_e, 1)
     if job.context == 5:
         job.context = 0
 
 
 def start(bot, update, job_queue, chat_data, args):
     if args:
-        job = job_queue.run_repeating(send_document, interval=1600, first=0, context=int(args[0])-1)
+        job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=int(args[0])-1)
     else:
-        job = job_queue.run_repeating(send_document, interval=1600, first=0, context=0)
+        job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=0)
     chat_data['job'] = job
 
 
@@ -51,10 +50,8 @@ def error(bot, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
 
 
-def job_stop(bot, update, job_queue, chat_data):
-    job = chat_data['job']
-    job.schedule_removal()
-    del chat_data['job']
+def job_stop(bot, update, job_queue):
+    job_queue.stop()
 
 
 def rewrite(bot, update):
@@ -67,11 +64,10 @@ def rewrite(bot, update):
 
 def count_time(bot, update):
     file_count = []
-    avg_time = (config.time_s+config.time_e)/2*len(config.chat_id)
     for c in config.chat_id:
         file_count.append(len(read_from_base(c[1:])))
-    file_count_h = [f*avg_time/3600 for f in file_count]
-    file_count_d = [f*avg_time/3600/24 for f in file_count]
+    file_count_h = [f*config.post_int/3600 for f in file_count]
+    file_count_d = [f*config.post_int/3600/24 for f in file_count]
     update.message.reply_text("Time left:\n {}\n {}".format(str(file_count_h), str(file_count_d)))
 
 
@@ -97,7 +93,7 @@ def main():
     dp.add_handler(CommandHandler("re", rewrite))
     dp.add_handler(CommandHandler("jobs", show_jobs, pass_job_queue=True))
     dp.add_handler(CommandHandler("count", count_time))
-    dp.add_handler(CommandHandler("stop", job_stop, pass_job_queue=True, pass_chat_data=True))
+    dp.add_handler(CommandHandler("stop", job_stop, pass_job_queue=True))
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.document, save_doc))
 
@@ -108,10 +104,9 @@ def main():
                           port=config.port,
                           url_path=config.token)
     updater.bot.set_webhook("https://botautopost.herokuapp.com/" + config.token)
-    chat_data = dp.chat_data
+
     job_queue = updater.job_queue
-    job = job_queue.run_repeating(send_document, interval=1600, first=0, context=0)
-    chat_data['job'] = job
+    job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=3)
 
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
