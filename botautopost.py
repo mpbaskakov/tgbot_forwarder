@@ -51,7 +51,7 @@ def error(bot, update, error):
 
 
 def job_stop(bot, update, job_queue):
-    job_queue.schedule
+    job_queue = None
 
 
 def rewrite(bot, update):
@@ -66,9 +66,17 @@ def count_time(bot, update):
     file_count = []
     for c in config.chat_id:
         file_count.append(len(read_from_base(c[1:])))
-    file_count_h = [f*config.post_int*len(file_count)/3600 for f in file_count]
-    file_count_d = [f*config.post_int*len(file_count)/3600/24 for f in file_count]
+    file_count_h = [round(f*config.post_int*len(file_count)/3600, 2) for f in file_count]
+    file_count_d = [round(f*config.post_int*len(file_count)/3600/24, 2) for f in file_count]
     update.message.reply_text("Time left:\n {}\n {}".format(str(file_count_h), str(file_count_d)))
+
+
+def count_max():
+    file_count = []
+    for c in config.chat_id:
+        file_count.append(len(read_from_base(c[1:])))
+    max_files_index = file_count.index(max(file_count))
+    return max_files_index
 
 
 def show_jobs(bot, update, job_queue):
@@ -106,7 +114,7 @@ def main():
     updater.bot.set_webhook("https://botautopost.herokuapp.com/" + config.token)
 
     job_queue = updater.job_queue
-    job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=3)
+    job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=count_max)
 
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
