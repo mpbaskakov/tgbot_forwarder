@@ -51,7 +51,7 @@ def error(bot, update, error):
 
 
 def job_stop(bot, update, job_queue):
-    job_queue = None
+    job_queue.schedule_removal()
 
 
 def rewrite(bot, update):
