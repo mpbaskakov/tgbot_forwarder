@@ -114,6 +114,7 @@ def main():
     updater.bot.set_webhook("https://botautopost.herokuapp.com/" + config.token)
 
     job_queue = updater.job_queue
+    print(count_max())
     job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=count_max)
 
 
