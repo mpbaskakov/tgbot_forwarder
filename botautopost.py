@@ -76,7 +76,7 @@ def count_max():
     for c in config.chat_id:
         file_count.append(len(read_from_base(c[1:])))
     max_files_index = file_count.index(max(file_count))
-    return max_files_index
+    return max_files_index + 1
 
 
 def show_jobs(bot, update, job_queue):
@@ -114,7 +114,7 @@ def main():
     updater.bot.set_webhook("https://botautopost.herokuapp.com/" + config.token)
 
     job_queue = updater.job_queue
-    job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=count_max+1)
+    job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=count_max)
 
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
