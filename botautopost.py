@@ -76,7 +76,7 @@ def count_max():
     for c in config.chat_id:
         file_count.append(len(read_from_base(c[1:])))
     max_files_index = file_count.index(max(file_count))
-    return int(max_files_index + 1)
+    return int(max_files_index)
 
 
 def show_jobs(bot, update, job_queue):
