@@ -19,7 +19,7 @@ def print_file_id(bot, update):
 def send_document(bot, job):
     file_list = read_from_base(config.chat_id[job.context[0]][1:])
     job.context[1] += 1
-    if job.context[0] == 4:
+    if job.context[1] == 4:
         return
     if not file_list:
         pass
