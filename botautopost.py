@@ -72,8 +72,8 @@ def count_time(bot, update):
     file_count = []
     for c in config.chat_id:
         file_count.append(len(read_from_base(c[1:])))
-    file_count_h = [round(f*config.post_int*len(file_count)/8, 2) for f in file_count]
-    file_count_d = [round(f*config.post_int*len(file_count)*3, 2) for f in file_count]
+    file_count_h = [f/8 for f in file_count]
+    file_count_d = [f*3 for f in file_count]
     update.message.reply_text("Time left:\n {}\n {}".format(str(file_count_h), str(file_count_d)))
 
 
