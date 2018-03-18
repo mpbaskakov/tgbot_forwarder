@@ -17,16 +17,19 @@ def print_file_id(bot, update):
 
 
 def send_document(bot, job):
-    file_list = read_from_base(config.chat_id[job.context][1:])
+    file_list = read_from_base(config.chat_id[job.context[0]][1:])
+    job.context[1] += 1
+    if job.context[0] == 4:
+        return
     if not file_list:
         pass
     else:
         file_id = file_list[randint(0, len(file_list) - 1)][0]
-        bot.send_document(config.chat_id[job.context], file_id)
-        write_to_base(config.chat_id[job.context][1:], file_id, erase=True)
-    job.context += 1
-    if job.context == 5:
-        job.context = 0
+        bot.send_document(config.chat_id[job.context[0]], file_id)
+        write_to_base(config.chat_id[job.context[0]][1:], file_id, erase=True)
+    job.context[0] += 1
+    if job.context[0] == 4:
+        job.context[0] = 0
 
 
 def start(bot, update, job_queue, chat_data, args):
@@ -105,7 +108,6 @@ def main():
     dp.add_handler(CommandHandler("jobs", show_jobs, pass_job_queue=True))
     dp.add_handler(CommandHandler("count", count_time))
     dp.add_handler(CommandHandler("stop", job_stop, pass_job_queue=True))
-    # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.document, save_doc))
 
     # log all errors
@@ -118,7 +120,7 @@ def main():
 
     job_queue = updater.job_queue
     channel_id = count_max()
-    job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=channel_id)
+    job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=[channel_id, 0])
 
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
