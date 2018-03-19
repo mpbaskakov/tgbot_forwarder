@@ -20,7 +20,7 @@ def send_document(bot, job):
     print(job.context)
     file_list = read_from_base(config.chat_id[job.context[0]][1:])
     job.context[1] += 1
-    if job.context[1] == 6:
+    if job.context[1] == 5:
         return
     if not file_list:
         pass
@@ -122,7 +122,7 @@ def main():
 
     job_queue = updater.job_queue
     channel_id = count_max()
-    job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=[channel_id, 0])
+    job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=[channel_id, -1])
 
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
