@@ -20,7 +20,7 @@ def send_document(bot, job):
     print(job.context)
     file_list = read_from_base(config.chat_id[job.context[0]][1:])
     job.context[1] += 1
-    if job.context[1] == 4:
+    if job.context[1] == 5:
         return
     if not file_list:
         pass
@@ -29,7 +29,7 @@ def send_document(bot, job):
         bot.send_document(config.chat_id[job.context[0]], file_id)
         write_to_base(config.chat_id[job.context[0]][1:], file_id, erase=True)
     job.context[0] += 1
-    if job.context[0] == 4:
+    if job.context[0] == 5:
         job.context[0] = 0
 
 
