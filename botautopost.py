@@ -28,7 +28,7 @@ def send_document(bot, job):
         file_id = file_list[randint(0, len(file_list) - 1)][0]
         bot.send_document(config.chat_id[job.context[0]], file_id)
         write_to_base(config.chat_id[job.context[0]][1:], file_id, erase=True)
-    print('Sended ' + job.context[0] + ', # of job: ' + job.context[1])
+    print('Sended ' + str(job.context[0]) + ', # of job: ' + str(job.context[1]))
     job.context[0] += 1
     if job.context[0] == 5:
         job.context[0] = 0
