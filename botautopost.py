@@ -116,8 +116,8 @@ def main():
                           key='private.key',
                           cert='cert.pem',
                          )
-    updater.bot.set_webhook(config.webhook_url)
-
+    updater.bot.set_webhook(webhook_url=config.webhook_url,
+                            certificate=open('cert.pem', 'rb'))
     job_queue = updater.job_queue
     channel_id = count_max()
     job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=channel_id)
