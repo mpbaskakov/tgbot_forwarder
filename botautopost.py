@@ -17,17 +17,16 @@ def print_file_id(bot, update):
 
 
 def send_document(bot, job):
-    file_list = read_from_base(config.chat_id[job.context[0]][1:])
+    file_list = read_from_base(config.chat_id[job.context][1:])
     if not file_list:
         pass
     else:
         file_id = file_list[randint(0, len(file_list) - 1)][0]
-        bot.send_document(config.chat_id[job.context[0]], file_id)
-        write_to_base(config.chat_id[job.context[0]][1:], file_id, erase=True)
-    print('Sended ' + str(job.context[0]) + ', # of job: ' + str(job.context[1]))
-    job.context[0] += 1
-    if job.context[0] == 5:
-        job.context[0] = 0
+        bot.send_document(config.chat_id[job.context], file_id)
+        write_to_base(config.chat_id[job.context][1:], file_id, erase=True)
+    job.context += 1
+    if job.context == 5:
+        job.context = 0
 
 
 def start(bot, update, job_queue, chat_data, args):
