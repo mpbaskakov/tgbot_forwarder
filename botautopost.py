@@ -110,12 +110,13 @@ def main():
     # log all errors
     dp.add_error_handler(error)
 
-    # updater.start_webhook(listen="127.0.0.1",
-    #                       port=config.port,
-    #                       url_path=config.token,
-    #                       key='private.key',
-    #                       cert='cert.pem',
-    #                      )
+    updater.start_webhook(listen="54.77.189.223",
+                          port=config.port,
+                          url_path=config.token,
+                          key='private.key',
+                          cert='cert.pem',
+                          webhook_url=config.webhook_url
+                         )
     # updater.bot.set_webhook(webhook_url=config.webhook_url,
     #                         certificate=open('cert.pem', 'rb'))
     job_queue = updater.job_queue
