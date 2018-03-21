@@ -118,11 +118,11 @@ def main():
     updater.start_webhook(listen="0.0.0.0",
                           port=config.port,
                           url_path=config.token)
-    updater.bot.set_webhook("https://botautopost.herokuapp.com/" + config.token)
+    updater.bot.set_webhook(config.webhook_url)
 
     job_queue = updater.job_queue
     channel_id = count_max()
-    job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=[channel_id, -1])
+    job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=channel_id)
 
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
