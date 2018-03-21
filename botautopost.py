@@ -112,7 +112,10 @@ def main():
 
     updater.start_webhook(listen="127.0.0.1",
                           port=config.port,
-                          url_path=config.token)
+                          url_path=config.token,
+                          key='private.key',
+                          cert='cert.pem',
+                         )
     updater.bot.set_webhook(config.webhook_url)
 
     job_queue = updater.job_queue
