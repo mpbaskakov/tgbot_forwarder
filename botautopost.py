@@ -19,7 +19,7 @@ def send_photo(bot, update):
         data = json.loads(url.read().decode())
         for i in range(0, 14):
             photo_url = (data[i]['profile_images']['thumbnail_image_big_live'][2:])
-            caption_html = '<b>' + data[i]['username'] + '</b>'
+            caption_html = '<b>' + data[i]['username'] + '</b>\n<a href=' + data[i]['chat_url_on_home_page'] + '>Link</a>'
             bot.send_photo(config.bctest, photo=photo_url, caption=caption_html, parse_mode='HTML')
             time.sleep(1)
 
