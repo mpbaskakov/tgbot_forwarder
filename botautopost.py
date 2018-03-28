@@ -3,12 +3,22 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 import config
 from db_connect import write_to_base, read_from_base, create_table, truncate_all, delete_all
+import urllib.request, json
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
+
+
+def send_photo(bot, update):
+    with urllib.request.urlopen(config.bclink) as url:
+        data = json.loads(url.read().decode())
+        for i in range(0, 14):
+            photo_url = (data[i]['profile_images']['thumbnail_image_big_live'][2:])
+            caption_html = '<b>' + data[i]['username'] + '</b>'
+            bot.send_photo(config.bctest, photo=photo_url, caption=caption_html, parse_mode='HTML')
 
 
 def print_file_id(bot, update):
@@ -104,6 +114,7 @@ def main():
     dp.add_handler(CommandHandler("re", rewrite))
     dp.add_handler(CommandHandler("jobs", show_jobs, pass_job_queue=True))
     dp.add_handler(CommandHandler("count", count_time))
+    dp.add_handler(CommandHandler("bctest", send_photo))
     dp.add_handler(CommandHandler("stop", job_stop, pass_job_queue=True))
     dp.add_handler(MessageHandler(Filters.document, save_doc))
 
