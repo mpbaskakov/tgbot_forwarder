@@ -1,4 +1,6 @@
 from random import randrange, randint
+
+import time
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 import config
@@ -19,6 +21,7 @@ def send_photo(bot, update):
             photo_url = (data[i]['profile_images']['thumbnail_image_big_live'][2:])
             caption_html = '<b>' + data[i]['username'] + '</b>'
             bot.send_photo(config.bctest, photo=photo_url, caption=caption_html, parse_mode='HTML')
+            time.sleep(1)
 
 
 def print_file_id(bot, update):
