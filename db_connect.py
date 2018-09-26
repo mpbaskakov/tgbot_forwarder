@@ -5,7 +5,10 @@ import config
 def sql_command(sql, fetch):
     conn = sqlite3.connect('main.db')
     cursor = conn.cursor()
-    cursor.execute(sql)
+    try:
+        cursor.execute(sql)
+    except sqlite3.OperationalError:
+        pass
     if fetch:
         rows = cursor.fetchall()
         return rows
