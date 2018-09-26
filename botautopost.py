@@ -1,11 +1,11 @@
 from random import randrange, randint
-
 import time
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 import config
 from db_connect import write_to_base, read_from_base, create_table, truncate_all, delete_all
-import urllib.request, json
+import urllib.request
+import json
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def send_photo(bot, update):
+    # BC parser. Not finished yet.
     with urllib.request.urlopen(config.bclink) as url:
         data = json.loads(url.read().decode())
         for i in range(0, 14):

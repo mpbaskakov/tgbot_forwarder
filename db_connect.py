@@ -1,19 +1,9 @@
-import random
-from urllib import parse
-import psycopg2
+import sqlite3
 import config
 
 
 def sql_command(sql, fetch):
-    parse.uses_netloc.append("postgres")
-    url = parse.urlparse(config.database_url)
-    conn = psycopg2.connect(
-        database=url.path[1:],
-        user=url.username,
-        password=url.password,
-        host=url.hostname,
-        port=url.port
-    )
+    conn = sqlite3.connect('main.db')
     cursor = conn.cursor()
     cursor.execute(sql)
     if fetch:
