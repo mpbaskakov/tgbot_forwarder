@@ -6,6 +6,7 @@ import config
 from db_connect import write_to_base, read_from_base, create_table, truncate_all, delete_all
 import urllib.request
 import json
+import os
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -101,6 +102,9 @@ def show_jobs(bot, update, job_queue):
 
 
 def main():
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    os.chdir(dname)
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
     updater = Updater(config.token)
