@@ -32,16 +32,21 @@ def print_file_id(bot, update):
 
 
 def send_document(bot, job):
-    file_list = read_from_base(config.chat_id[job.context][1:])
+    id = job.context['id']
+    file_list = read_from_base(config.chat_id[id][1:])
     if not file_list:
         pass
     else:
         file_id = file_list[randint(0, len(file_list) - 1)][0]
-        bot.send_document(config.chat_id[job.context], file_id)
+        if id == 0 and job.context['counter'] % 15 == 0:
+            caption_text = config.caption_text[randint(0, 4)]
+            bot.send_document(config.chat_id[id], file_id, caption='{}\nhttps://bit.ly/2R9Dq7P'.format(caption_text))
+        else:
+            bot.send_document(config.chat_id[id], file_id)
         write_to_base(config.chat_id[job.context][1:], file_id, erase=True)
-    job.context += 1
-    if job.context == 5:
-        job.context = 0
+    id += 1
+    if id == 4: id = 0
+    if job.context['counter'] == 20000: job.context['counter'] = 0
 
 
 def start(bot, update, job_queue, chat_data, args):
@@ -130,7 +135,7 @@ def main():
     dp.add_error_handler(error)
     job_queue = updater.job_queue
     channel_id = count_max()
-    job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context=channel_id)
+    job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context={'id': channel_id, 'counter': 0})
     updater.start_polling()
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
