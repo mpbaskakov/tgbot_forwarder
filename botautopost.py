@@ -44,7 +44,6 @@ def send_document(bot, job):
             if counter % 3 == 0:
                 caption_text = config.caption_text[randint(0, 4)]
                 bot.send_document(config.chat_id[id], file_id, caption='{}\nhttps://bit.ly/2R9Dq7P'.format(caption_text))
-                write_to_base(config.chat_id[id][1:], file_id, erase=True)
             else:
                 bot.send_document(config.chat_id[id], file_id)
             if counter == 20000: counter = 0
