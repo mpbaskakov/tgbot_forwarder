@@ -33,20 +33,26 @@ def print_file_id(bot, update):
 
 def send_document(bot, job):
     id = job.context['id']
+    counter = job.context['counter']
     file_list = read_from_base(config.chat_id[id][1:])
     if not file_list:
         pass
     else:
         file_id = file_list[randint(0, len(file_list) - 1)][0]
-        if id == 0 and job.context['counter'] % 15 == 0:
-            caption_text = config.caption_text[randint(0, 4)]
-            bot.send_document(config.chat_id[id], file_id, caption='{}\nhttps://bit.ly/2R9Dq7P'.format(caption_text))
+        if id == 0:
+            counter += 1
+            if counter % 3 == 0:
+                caption_text = config.caption_text[randint(0, 4)]
+                bot.send_document(config.chat_id[id], file_id, caption='{}\nhttps://bit.ly/2R9Dq7P'.format(caption_text))
+            else:
+                bot.send_document(config.chat_id[id], file_id)
+            if counter == 20000: counter = 0
         else:
             bot.send_document(config.chat_id[id], file_id)
         write_to_base(config.chat_id[job.context][1:], file_id, erase=True)
     id += 1
     if id == 4: id = 0
-    if job.context['counter'] == 20000: job.context['counter'] = 0
+
 
 
 def start(bot, update, job_queue, chat_data, args):
