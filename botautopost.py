@@ -33,36 +33,39 @@ def print_file_id(bot, update):
 
 
 def send_document(bot, job):
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    os.chdir(dname)
     id = job.context['id']
     chat_name = config.chat_id[id]
     ad_counter = job.context['ad_counter']
     file_list = read_from_base(config.chat_id[id][1:])
-    print(job.context)
+    print(job.context, file=open('log.txt', 'a'))
     if not file_list:
         pass
     else:
         file_id = file_list[randint(0, len(file_list) - 1)][0]
-        print(job.context)
+        print(job.context, file=open('log.txt', 'a'))
         if id == 0:
             print(job.context)
             if ad_counter % 3 == 0:
                 caption_text = config.caption_text[randint(0, 4)]
                 bot.send_document(chat_name, file_id, caption='{}\n'.format(caption_text, config.bc_link))
-                print(job.context)
+                print(job.context, file=open('log.txt', 'a'))
             else:
                 bot.send_document(chat_name, file_id)
-                print(job.context)
+                print(job.context, file=open('log.txt', 'a'))
             ad_counter += 1
-            print(job.context)
+            print(job.context, file=open('log.txt', 'a'))
             if ad_counter == 20000: ad_counter = 0
         else:
             bot.send_document(chat_name, file_id)
         write_to_base(chat_name[1:], file_id, erase=True)
-        print(job.context)
+        print(job.context, file=open('log.txt', 'a'))
     id += 1
-    print(job.context)
+    print(job.context, file=open('log.txt', 'a'))
     if id == 4: id = 0
-    print(job.context)
+    print(job.context, file=open('log.txt', 'a'))
 
 
 
