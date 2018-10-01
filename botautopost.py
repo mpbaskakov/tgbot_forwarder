@@ -8,9 +8,13 @@ import urllib.request
 import json
 import os
 
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
+
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+                    level=logging.INFO, filename='log.txt')
 
 logger = logging.getLogger(__name__)
 
@@ -31,27 +35,40 @@ def print_file_id(bot, update):
     update.message.reply_text("List of id's:\n" + ''.join(read_from_base()))
 
 
+def debug(log)
+
+
 def send_document(bot, job):
     id = job.context['id']
-    counter = job.context['counter']
+    chat_name = config.chat_id[id]
+    ad_counter = job.context['ad_counter']
     file_list = read_from_base(config.chat_id[id][1:])
+    print(job.context)
     if not file_list:
         pass
     else:
         file_id = file_list[randint(0, len(file_list) - 1)][0]
+        print(job.context)
         if id == 0:
-            counter += 1
-            if counter % 3 == 0:
+            print(job.context)
+            if ad_counter % 3 == 0:
                 caption_text = config.caption_text[randint(0, 4)]
-                bot.send_document(config.chat_id[id], file_id, caption='{}\nhttps://bit.ly/2R9Dq7P'.format(caption_text))
+                bot.send_document(chat_name, file_id, caption='{}\n'.format(caption_text, config.bc_link))
+                print(job.context)
             else:
-                bot.send_document(config.chat_id[id], file_id)
-            if counter == 20000: counter = 0
+                bot.send_document(chat_name, file_id)
+                print(job.context)
+            ad_counter += 1
+            print(job.context)
+            if ad_counter == 20000: ad_counter = 0
         else:
-            bot.send_document(config.chat_id[id], file_id)
-        write_to_base(config.chat_id[id][1:], file_id, erase=True)
+            bot.send_document(chat_name, file_id)
+        write_to_base(chat_name[1:], file_id, erase=True)
+        print(job.context)
     id += 1
+    print(job.context)
     if id == 4: id = 0
+    print(job.context)
 
 
 
@@ -113,9 +130,6 @@ def show_jobs(bot, update, job_queue):
 
 
 def main():
-    abspath = os.path.abspath(__file__)
-    dname = os.path.dirname(abspath)
-    os.chdir(dname)
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
     updater = Updater(config.token)
@@ -141,7 +155,7 @@ def main():
     dp.add_error_handler(error)
     job_queue = updater.job_queue
     channel_id = count_max()
-    job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context={'id': channel_id, 'counter': 0})
+    job = job_queue.run_repeating(send_document, interval=config.post_int, first=0, context={'id': channel_id, 'ad_counter': 0})
     updater.start_polling()
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
