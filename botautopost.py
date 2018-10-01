@@ -8,13 +8,10 @@ import urllib.request
 import json
 import os
 
-abspath = os.path.abspath(__file__)
-dname = os.path.dirname(abspath)
-os.chdir(dname)
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO, filename='log.txt')
+                    level=logging.INFO, filename='/home/vdesktop/dev/tgbot_forwarder_log.txt')
 
 logger = logging.getLogger(__name__)
 
