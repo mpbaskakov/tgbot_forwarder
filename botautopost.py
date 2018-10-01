@@ -56,15 +56,19 @@ def send_document(bot, job):
                 bot.send_document(chat_name, file_id)
                 print(str(job.context) + ' 4', file=open('log.txt', 'a'))
             ad_counter += 1
+            job.context['ad_counter'] = ad_counter
             print(str(job.context) + ' 5', file=open('log.txt', 'a'))
-            if ad_counter == 20000: ad_counter = 0
+            if ad_counter == 20000:
+                job.context['ad_counter'] = 0
         else:
             bot.send_document(chat_name, file_id)
         write_to_base(chat_name[1:], file_id, erase=True)
         print(str(job.context) + ' 6', file=open('log.txt', 'a'))
     id += 1
+    job.context['id'] = id
     print(str(job.context) + ' 7', file=open('log.txt', 'a'))
-    if id == 4: id = 0
+    if id == 4:
+        job.context['id'] = 0
     print(str(job.context) + ' 8', file=open('log.txt', 'a'))
 
 
