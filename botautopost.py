@@ -36,40 +36,36 @@ def send_document(bot, job):
     abspath = os.path.abspath(__file__)
     dname = os.path.dirname(abspath)
     os.chdir(dname)
-    id = job.context['id']
-    chat_name = config.chat_id[id]
-    ad_counter = job.context['ad_counter']
-    file_list = read_from_base(config.chat_id[id][1:])
-    print(str(job.context) + ' 0', file=open('log.txt', 'a'))
+    chat_name = config.chat_id[job.context['id']]
+    file_list = read_from_base(config.chat_id[job.context['id']][1:])
+    # print(str(job.context) + ' 0', file=open('log.txt', 'a'))
     if not file_list:
         pass
     else:
         file_id = file_list[randint(0, len(file_list) - 1)][0]
-        print(str(job.context) + ' 1', file=open('log.txt', 'a'))
-        if id == 0:
-            print(str(job.context) + ' 2', file=open('log.txt', 'a'))
-            if ad_counter % 3 == 0:
+        # print(str(job.context) + ' 1', file=open('log.txt', 'a'))
+        if job.context['id'] == 0:
+            # print(str(job.context) + ' 2', file=open('log.txt', 'a'))
+            if job.context['ad_counter'] % 3 == 0:
                 caption_text = config.caption_text[randint(0, 4)]
-                bot.send_document(chat_name, file_id, caption='{}\n'.format(caption_text, config.bc_link))
-                print(str(job.context) + ' 3', file=open('log.txt', 'a'))
+                bot.send_document(chat_name, file_id, caption='{}\n{}'.format(caption_text, config.bc_link))
+                # print(str(job.context) + ' 3', file=open('log.txt', 'a'))
             else:
                 bot.send_document(chat_name, file_id)
-                print(str(job.context) + ' 4', file=open('log.txt', 'a'))
-            ad_counter += 1
-            job.context['ad_counter'] = ad_counter
-            print(str(job.context) + ' 5', file=open('log.txt', 'a'))
-            if job.context['ad_counter'] == 20000:
+                # print(str(job.context) + ' 4', file=open('log.txt', 'a'))
+            job.context['ad_counter'] += 1
+            # print(str(job.context) + ' 5', file=open('log.txt', 'a'))
+            if job.context['ad_counter'] == 3:
                 job.context['ad_counter'] = 0
         else:
             bot.send_document(chat_name, file_id)
         write_to_base(chat_name[1:], file_id, erase=True)
-        print(str(job.context) + ' 6', file=open('log.txt', 'a'))
-    id += 1
-    job.context['id'] = id
-    print(str(job.context) + ' 7', file=open('log.txt', 'a'))
-    if job.context['id'] == 4:
+        # print(str(job.context) + ' 6', file=open('log.txt', 'a'))
+    job.context['id'] += 1
+    # print(str(job.context) + ' 7', file=open('log.txt', 'a'))
+    if job.context['id'] == 5:
         job.context['id'] = 0
-    print(str(job.context) + ' 8', file=open('log.txt', 'a'))
+    # print(str(job.context) + ' 8', file=open('log.txt', 'a'))
 
 
 
