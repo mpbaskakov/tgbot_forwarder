@@ -32,9 +32,6 @@ def print_file_id(bot, update):
     update.message.reply_text("List of id's:\n" + ''.join(read_from_base()))
 
 
-def debug(log)
-
-
 def send_document(bot, job):
     id = job.context['id']
     chat_name = config.chat_id[id]
