@@ -58,7 +58,7 @@ def send_document(bot, job):
             ad_counter += 1
             job.context['ad_counter'] = ad_counter
             print(str(job.context) + ' 5', file=open('log.txt', 'a'))
-            if ad_counter == 20000:
+            if job.context['ad_counter'] == 20000:
                 job.context['ad_counter'] = 0
         else:
             bot.send_document(chat_name, file_id)
@@ -67,7 +67,7 @@ def send_document(bot, job):
     id += 1
     job.context['id'] = id
     print(str(job.context) + ' 7', file=open('log.txt', 'a'))
-    if id == 4:
+    if job.context['id'] == 4:
         job.context['id'] = 0
     print(str(job.context) + ' 8', file=open('log.txt', 'a'))
 
